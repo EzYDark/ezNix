@@ -1,12 +1,14 @@
 { pkgs, ... }:
 let
-  modules = ./modules;
+  modules = ../../../modules;
 in {
   imports = [
     ./hardware-configuration.nix
     ./users_groups.nix
+    
     (modules + "/programs/fish.nix")
     (modules + "/programs/git.nix")
+    (modules + "/programs/direnv.nix")
     (modules + "/development/rust.nix")
     (modules + "/development/go.nix")
     (modules + "/development/python.nix")
