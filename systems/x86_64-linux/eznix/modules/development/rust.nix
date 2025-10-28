@@ -8,9 +8,7 @@ in {
     sccache
   ];
 
-  environment.sessionVariables = {
-    RUSTC_WRAPPER = sccacheBin;
-  };
+  environment.sessionVariables.RUSTC_WRAPPER = sccacheBin;
 
   programs.fish = lib.mkIf config.programs.fish.enable {
     interactiveShellInit = lib.mkAfter ''

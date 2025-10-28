@@ -7,8 +7,12 @@ in {
     ./users_groups.nix
     (modules + "/programs/system-packages.nix")
     (modules + "/programs/fish.nix")
-    (modules + "/programs/rust-dev.nix")
     (modules + "/programs/git.nix")
+    (modules + "/development/rust.nix")
+    (modules + "/development/go.nix")
+    (modules + "/development/python.nix")
+    (modules + "/development/node.nix")
+    (modules + "/development/nix-lang.nix")
     (modules + "/services/flatpak.nix")
     (modules + "/services/desktop.nix")
     (modules + "/services/audio.nix")
