@@ -1,11 +1,8 @@
 {
   pkgs,
-  lib,
-  namespace,
   ...
 }:
-with lib;
-with lib.${namespace}; {
+{
   users.users = {
     ezy = {
       isNormalUser = true;

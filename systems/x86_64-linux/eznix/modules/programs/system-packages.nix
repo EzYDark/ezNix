@@ -8,8 +8,6 @@
     python312
     uv
     alacritty
-    rustup
-    rust-analyzer
     go
   ];
 }

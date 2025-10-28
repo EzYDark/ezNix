@@ -7,6 +7,7 @@ in {
     ./users_groups.nix
     (modules + "/programs/system-packages.nix")
     (modules + "/programs/fish.nix")
+    (modules + "/programs/rust-dev.nix")
     (modules + "/programs/git.nix")
     (modules + "/services/flatpak.nix")
     (modules + "/services/desktop.nix")
