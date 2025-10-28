@@ -19,6 +19,7 @@ in {
     (modules + "/services/desktop.nix")
     (modules + "/services/audio.nix")
     (modules + "/services/printing.nix")
+    (modules + "/services/cloudflare-warp.nix")
     (modules + "/system/boot.nix")
     (modules + "/system/localization.nix")
     (modules + "/system/networking.nix")
