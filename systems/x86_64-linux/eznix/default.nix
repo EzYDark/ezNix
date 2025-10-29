@@ -16,6 +16,7 @@ in {
     (modules + "/development/nix-lang.nix")
     (modules + "/development/ide/cursor.nix")
     (modules + "/development/ide/windsurf.nix")
+    (modules + "/development/ide/zed.nix")
     (modules + "/services/flatpak.nix")
     (modules + "/services/desktop.nix")
     (modules + "/services/audio.nix")
