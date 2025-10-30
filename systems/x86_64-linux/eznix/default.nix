@@ -29,9 +29,18 @@ in {
 
   environment.systemPackages = with pkgs; [
     alacritty
+    gfn-electron
+
+    linuxKernel.packages.linux_xanmod_latest.xone
   ];
 
+  environment.sessionVariables = {
+    NIXPKGS_ALLOW_INSECURE = "1";
+  };
+
   networking.hostName = "eznix";
+
+  hardware.xone.enable = true;
 
   system.stateVersion = "25.05";
 }
