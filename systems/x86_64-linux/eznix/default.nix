@@ -37,10 +37,14 @@ in {
   environment.sessionVariables = {
     NIXPKGS_ALLOW_INSECURE = "1";
   };
+  hardware.xone.enable = true;
+
+  hardware.graphics = {
+    enable = true;
+    enable32Bit = true;
+  };
 
   networking.hostName = "eznix";
-
-  hardware.xone.enable = true;
 
   system.stateVersion = "25.05";
 }
