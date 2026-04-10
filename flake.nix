@@ -13,13 +13,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nix-flatpak = {
-      url = "github:gmodena/nix-flatpak";
+    disko = {
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # disko = {
-    #   url = "github:nix-community/disko";
-    #   inputs.nixpkgs.follows = "nixpkgs";
+    # nixos-hardware = {
+    #   url = "github:NixOS/nixos-hardware/master";
     # };
   };
 
@@ -41,8 +41,8 @@
       };
 
       systems.modules.nixos = with inputs; [
-        nix-flatpak.nixosModules.nix-flatpak
-        # disko.nixosModules.disko
+        disko.nixosModules.disko
+        # nixos-hardware.nixosModules.rock-5b
       ];
 
       homes.modules = with inputs; [
