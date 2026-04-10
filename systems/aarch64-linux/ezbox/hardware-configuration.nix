@@ -6,10 +6,23 @@
     ];
 
   boot.initrd.availableKernelModules = [
-    "nvme"
+    "nvme"                        # M.2 NVMe SSDs
+    "xhci_pci"                    # USB 3.0
+    "usb_storage"                 # USB Mass Storage
+    "usbhid"                      # USB Input devices
+    "phy_rockchip_naneng_combphy" # PCIe/SATA/USB3 PHY
+    "phy_rockchip_snps_pcie3"     # PCIe 3.0 PHY
+    "phy_rockchip_inno_usb2"      # USB 2.0 PHY
+    "phy_rockchip_typec"          # Type-C PHY
+    "mmc_block"                   # SD/eMMC block driver
+    "dw_mmc_rockchip"             # Rockchip legacy SD/eMMC
+    "sdhci_of_dwcmshc"            # Rockchip SDHCI
   ];
   boot.initrd.kernelModules = [ ];
   boot.kernelModules = [
+    "rk808"      # Power management IC
+    "panfrost"   # Mali GPU driver
+
     "libcomposite"
   ];
   boot.extraModulePackages = [ ];
@@ -63,40 +76,52 @@
     after = [ "systemd-modules-load.service" ];
     
     script = ''
-      # The base ConfigFS path
       CONFIGFS="/sys/kernel/config/usb_gadget/rock5b"
       
-      # Clean up any existing configurations (cynical reset)
+      # PROPER TEARDOWN SEQUENCE
+      # ConfigFS requires strict reverse-order destruction.
       if [ -d "$CONFIGFS" ]; then
-        rm -f $CONFIGFS/os_desc/b.1
-        rm -f $CONFIGFS/configs/c.1/*
-        rm -f $CONFIGFS/configs/c.1/strings/0x409/*
-        rmdir $CONFIGFS/configs/c.1 || true
-        rmdir $CONFIGFS/functions/* || true
-        rmdir $CONFIGFS/strings/0x409 || true
-        rmdir $CONFIGFS || true
+        # 1. Unbind from the controller (if currently bound)
+        echo "" > $CONFIGFS/UDC 2>/dev/null || true
+        
+        # 2. Unlink functions from configurations
+        rm -f $CONFIGFS/configs/c.1/acm.usb0 2>/dev/null || true
+        rm -f $CONFIGFS/configs/c.1/ecm.usb0 2>/dev/null || true
+        
+        # 3. Remove configuration strings
+        rmdir $CONFIGFS/configs/c.1/strings/0x409 2>/dev/null || true
+        
+        # 4. Remove configurations
+        rmdir $CONFIGFS/configs/c.1 2>/dev/null || true
+        
+        # 5. Remove functions
+        rmdir $CONFIGFS/functions/acm.usb0 2>/dev/null || true
+        rmdir $CONFIGFS/functions/ecm.usb0 2>/dev/null || true
+        
+        # 6. Remove gadget strings
+        rmdir $CONFIGFS/strings/0x409 2>/dev/null || true
+        
+        # 7. Remove the gadget itself
+        rmdir $CONFIGFS 2>/dev/null || true
       fi
 
-      # Create the new gadget
+      # INITIALIZATION SEQUENCE
       mkdir -p $CONFIGFS
       cd $CONFIGFS
       
-      # Define standard USB Identifiers (Vendor/Product IDs)
-      echo 0x1d6b > idVendor  # Linux Foundation
-      echo 0x0104 > idProduct # Multifunction Composite Gadget
-      echo 0x0100 > bcdDevice # v1.0.0
-      echo 0x0200 > bcdUSB    # USB 2.0
+      echo 0x1d6b > idVendor
+      echo 0x0104 > idProduct
+      echo 0x0100 > bcdDevice
+      echo 0x0200 > bcdUSB
       echo 0xEF > bDeviceClass
       echo 0x02 > bDeviceSubClass
       echo 0x01 > bDeviceProtocol
       
-      # Set English strings
       mkdir -p strings/0x409
       echo "0123456789ABCDEF" > strings/0x409/serialnumber
       echo "Radxa" > strings/0x409/manufacturer
       echo "Rock 5B Gadget" > strings/0x409/product
 
-      # Create a configuration profile
       mkdir -p configs/c.1/strings/0x409
       echo "Config 1: ECM Network & Serial" > configs/c.1/strings/0x409/configuration
       echo 250 > configs/c.1/MaxPower
@@ -107,19 +132,14 @@
 
       # Feature 2: USB Network (ECM)
       mkdir -p functions/ecm.usb0
-      # Optional: set fixed MAC addresses so they don't randomize on every boot
-      # echo "42:63:65:12:34:56" > functions/ecm.usb0/host_addr
-      # echo "42:63:65:65:43:21" > functions/ecm.usb0/dev_addr
       ln -s functions/ecm.usb0 configs/c.1/
 
-      # Bind the gadget to the UDC (USB Device Controller)
-      # WARNING: 'fc000000.usb' is the typical address for RK3588 Type-C.
-      # Run `ls /sys/class/udc` on your live system to verify your exact UDC name if it fails.
+      # Bind to UDC
       UDC_NAME=$(ls /sys/class/udc | head -n 1)
       if [ -n "$UDC_NAME" ]; then
         echo "$UDC_NAME" > UDC
       else
-        echo "Error: No USB Device Controller found. Check your device tree overlay."
+        echo "Error: No USB Device Controller found."
         exit 1
       fi
     '';

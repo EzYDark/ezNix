@@ -27,7 +27,7 @@ in {
   ];
 
   environment.systemPackages = with pkgs; [
-
+    wget
   ];
 
   environment.sessionVariables = {
@@ -37,6 +37,8 @@ in {
   hardware.graphics = {
     enable = true;
   };
+
+  programs.nix-ld.enable = true;
 
   networking.hostName = "ezbox";
 
